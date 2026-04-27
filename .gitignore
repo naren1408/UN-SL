@@ -12,6 +12,3 @@ archive (1) patches/
 __pycache__/
 *.pyc
 
-# Optional: ignore OS files
-.DS_Store
-Thumbs.db
