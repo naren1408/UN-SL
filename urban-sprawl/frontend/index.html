@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urban Sprawl Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero" id="top">
+      <div class="hero__backdrop"></div>
+      <div class="hero__copy">
+        <p class="eyebrow">Orbital Telemetry Console</p>
+        <h1>Urban Sprawl Monitoring System</h1>
+        <p class="hero__subtitle">Unsupervised satellite image segmentation · K-Means clustering · Change detection</p>
+        <div class="hero__actions">
+          <button class="action-button" data-mode-target="single">Analyze Single Image</button>
+          <button class="action-button action-button--secondary" data-mode-target="compare">Compare Two Time Periods</button>
+        </div>
+      </div>
+      <div class="orbit-visual" aria-hidden="true">
+        <div class="orbit orbit--one"></div>
+        <div class="orbit orbit--two"></div>
+        <div class="orbit-core"></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel reveal" id="upload-section">
+        <div class="panel__header">
+          <div>
+            <p class="eyebrow">Mission Input</p>
+            <h2>Upload Satellite Frames</h2>
+          </div>
+          <div class="mode-switch">
+            <button class="mode-tab mode-tab--active" data-mode="single">Single Image</button>
+            <button class="mode-tab" data-mode="compare">Compare Mode</button>
+          </div>
+        </div>
+
+        <div class="upload-layout" id="single-mode">
+          <div class="upload-stack">
+            <div class="drop-zone drop-zone--single" data-input="single-file">
+              <input type="file" id="single-file" accept=".png,.jpg,.jpeg,.tif,.tiff" hidden>
+              <div class="drop-zone__icon">🛰</div>
+              <p class="drop-zone__title">Drop satellite image here · PNG / JPG / TIF</p>
+              <p class="drop-zone__hint">Click or drag to upload a single observation frame.</p>
+              <img class="drop-zone__preview" alt="Single upload preview">
+            </div>
+            <div class="dataset-panel">
+              <div>
+                <p class="dataset-panel__label">Or use the provided dataset folder</p>
+                <select id="dataset-single-select"></select>
+              </div>
+              <button class="dataset-button" id="dataset-single-preview">Load Dataset Frame</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-layout upload-layout--compare hidden" id="compare-mode">
+          <div class="upload-stack">
+            <div class="drop-zone drop-zone--before" data-input="compare-file-1">
+              <input type="file" id="compare-file-1" accept=".png,.jpg,.jpeg,.tif,.tiff" hidden>
+              <div class="drop-zone__tag">T1 · Before</div>
+              <div class="drop-zone__icon">🛰</div>
+              <p class="drop-zone__title">Drop satellite image here · PNG / JPG / TIF</p>
+              <img class="drop-zone__preview" alt="Before upload preview">
+            </div>
+            <div class="dataset-panel">
+              <div>
+                <p class="dataset-panel__label">Dataset T1</p>
+                <select id="dataset-compare-1-select"></select>
+              </div>
+              <button class="dataset-button" id="dataset-compare-1-preview">Load T1 Dataset Frame</button>
+            </div>
+          </div>
+          <div class="upload-stack">
+            <div class="drop-zone drop-zone--after" data-input="compare-file-2">
+              <input type="file" id="compare-file-2" accept=".png,.jpg,.jpeg,.tif,.tiff" hidden>
+              <div class="drop-zone__tag drop-zone__tag--coral">T2 · After</div>
+              <div class="drop-zone__icon">🛰</div>
+              <p class="drop-zone__title">Drop satellite image here · PNG / JPG / TIF</p>
+              <img class="drop-zone__preview" alt="After upload preview">
+            </div>
+            <div class="dataset-panel">
+              <div>
+                <p class="dataset-panel__label">Dataset T2</p>
+                <select id="dataset-compare-2-select"></select>
+              </div>
+              <button class="dataset-button dataset-button--coral" id="dataset-compare-2-preview">Load T2 Dataset Frame</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel__footer">
+          <button id="run-analysis" class="submit-button">Run Segmentation →</button>
+        </div>
+      </section>
+
+      <section class="dashboard hidden reveal" id="results-section">
+        <div class="dashboard__header">
+          <div>
+            <p class="eyebrow">Result Deck</p>
+            <h2>Segmentation Dashboard</h2>
+          </div>
+          <label class="toggle">
+            <span>Overlay ON / OFF</span>
+            <input type="checkbox" id="overlay-toggle" checked>
+            <span class="toggle__track"><span class="toggle__thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="image-grid">
+          <article class="image-card">
+            <div class="image-card__header">
+              <h3>Original Image</h3>
+              <button class="download-button" data-download="original">↓</button>
+            </div>
+            <img id="original-image" alt="Original satellite image">
+          </article>
+
+          <article class="image-card">
+            <div class="image-card__header">
+              <h3>Segmented Map</h3>
+              <button class="download-button" data-download="segmented">↓</button>
+            </div>
+            <img id="segmented-image" alt="Segmented satellite map">
+          </article>
+
+          <article class="image-card" id="overlay-card">
+            <div class="image-card__header">
+              <h3>Overlay View</h3>
+              <button class="download-button" data-download="overlay">↓</button>
+            </div>
+            <img id="overlay-image" alt="Overlay view">
+          </article>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card metric-card--urban">
+            <p>Urban %</p>
+            <strong id="urban-metric">0.0%</strong>
+          </article>
+          <article class="metric-card metric-card--vegetation">
+            <p>Vegetation %</p>
+            <strong id="vegetation-metric">0.0%</strong>
+          </article>
+          <article class="metric-card metric-card--roads">
+            <p>Roads %</p>
+            <strong id="roads-metric">0.0%</strong>
+          </article>
+        </div>
+
+        <div class="legend">
+          <span class="legend-pill legend-pill--urban">🔴 Urban</span>
+          <span class="legend-pill legend-pill--vegetation">🟢 Vegetation</span>
+          <span class="legend-pill legend-pill--roads">⚫ Roads</span>
+        </div>
+
+        <div class="comparison-panel hidden" id="comparison-panel">
+          <div class="comparison-grid">
+            <article class="slider-card">
+              <div class="slider-card__header">
+                <h3>Before vs After</h3>
+                <span class="mono" id="slider-label">T2 reveal: 50%</span>
+              </div>
+              <div class="comparison-slider" id="comparison-slider-card">
+                <img id="slider-base-image" alt="Before view">
+                <div class="comparison-slider__overlay" id="slider-overlay-layer">
+                  <img id="slider-top-image" alt="After view">
+                </div>
+                <div class="comparison-slider__divider" id="slider-divider"></div>
+                <input type="range" id="compare-slider" min="0" max="100" value="50">
+              </div>
+            </article>
+
+            <article class="growth-card">
+              <p>Urban Growth</p>
+              <strong id="growth-metric">+0.0%</strong>
+              <span class="growth-card__subtext">Net change between T1 and T2 urban coverage.</span>
+            </article>
+          </div>
+
+          <article class="heatmap-card">
+            <div class="heatmap-card__header">
+              <h3>Expansion Heatmap</h3>
+              <button class="download-button" data-download="change-mask">↓</button>
+            </div>
+            <canvas id="heatmap-canvas" width="256" height="256"></canvas>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="processing-overlay hidden" id="processing-overlay">
+    <div class="processing-overlay__content">
+      <div class="radar-loader">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <p id="processing-text">Preprocessing pixels…</p>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

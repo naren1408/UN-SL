@@ -1,0 +1,17 @@
+# Ignore dataset
+archive (1) patches/
+
+# Ignore virtual environment
+.venv/
+
+# Ignore logs
+*.out
+*.err
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Optional: ignore OS files
+.DS_Store
+Thumbs.db
