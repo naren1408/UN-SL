@@ -143,7 +143,7 @@ compareSlider.addEventListener("input", (event) => {
   sliderLabel.textContent = `T2 reveal: ${value}%`;
 });
 
-document.querySelectorAll(".download-button").forEach((button) => {
+document.querySelectorAll("[data-download]").forEach((button) => {
   button.addEventListener("click", () => {
     const key = button.dataset.download;
     const payload = state.downloads[key];
